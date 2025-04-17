@@ -23,62 +23,38 @@ jobs:
       pull-requests: write
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 1.0.0
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.0
 
-    - name: Configure AWS credentials using OIDC
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        role-to-assume: arn:aws:iam::116981791124:role/idp-role
-        aws-region: us-west-1
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::116981791124:role/idp-role
+          aws-region: us-west-1
 
-    - name: Initialize Terraform
-      run: terraform init
+      - name: Initialize Terraform
+        run: terraform init
 
-    - name: Validate Terraform
-      run: terraform validate
+      - name: Validate Terraform
+        run: terraform validate
 
-    - name: Format Terraform
-      run: terraform fmt -recursive
+      - name: Format Terraform
+        run: terraform fmt -recursive
 
-    - name: Install TFLint
-      run: |
-        curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+      - name: Install TFLint
+        run: |
+          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
 
-    - name: Run TFLint
-      run: tflint
+      - name: Run TFLint
+        run: tflint
 
-    - name: Capture Terraform Plan Output
-      if: github.event.inputs.action == 'plan'
-      run: terraform plan -out=tfplan > plan_output.txt
+      - name: Install Checkov
+        run: pip install checkov
 
-    - name: Summarize Plan Output
-      if: github.event.inputs.action == 'plan'
-      run: |
-        echo "# Terraform Deployment" > README.md
-        echo "## Action: ${GITHUB_EVENT_INPUTS_ACTION}" >> README.md
-        echo "### Terraform Plan Summary" >> README.md
-        grep -E 'Plan:|No changes.|Changes to be applied.' plan_output.txt >> README.md
-
-    - name: Install terraform-docs
-      run: |
-        curl -s https://raw.githubusercontent.com/terraform-docs/terraform-docs/main/install.sh | bash
-
-    - name: Generate Terraform Documentation
-      run: |
-        terraform-docs markdown table . >> README.md
-
-    - name: Commit and Push README.md
-      env:
-        GH_PAT: ${{ secrets.GH_PAT }}
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add README.md
-        git commit -m "Update README.md with Terraform deployment plan summary and documentation"
-        git push https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.git
+      - name: Run Checkov
+        run: checkov -d .
