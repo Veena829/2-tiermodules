@@ -1,4 +1,5 @@
 terraform {
+  required_version = ">= 1.0.0"
   backend "s3" {
     bucket = "alb-project-bucket123"  # Replace with your unique S3 bucket name
     key    = "path/to/my/statefile/terraform.tfstate"  # Path inside the bucket to store the state
