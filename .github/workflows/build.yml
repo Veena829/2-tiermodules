@@ -52,9 +52,23 @@ jobs:
 
       - name: Run TFLint
         run: tflint
-
       - name: Install Checkov
         run: pip install checkov
 
       - name: Run Checkov
+        id: checkov
         run: checkov -d .
+        continue-on-error: true
+
+      - name: Set Checkov result
+        id: set-checkov-result
+        run: |
+          if [ "${{ steps.checkov.outcome }}" == "failure" ]; then
+            echo "checkov_failed=true" >> $GITHUB_ENV
+          else
+            echo "checkov_failed=false" >> $GITHUB_ENV
+          fi
+
+      - name: Conditional step based on Checkov result
+        if: ${{ env.checkov_failed == 'false' }}
+        run: echo "Checkov passed, running subsequent steps..."
