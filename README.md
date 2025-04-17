@@ -42,7 +42,7 @@
 | <a name="input_public_subnet_cidr_2"></a> [public\_subnet\_cidr\_2](#input\_public\_subnet\_cidr\_2) | CIDR block for the second public subnet | `string` | `"10.0.2.0/24"` | no |
 | <a name="input_rds_instance_class"></a> [rds\_instance\_class](#input\_rds\_instance\_class) | The instance class for the RDS MySQL database | `string` | `"db.t3.micro"` | no |
 | <a name="input_rds_password"></a> [rds\_password](#input\_rds\_password) | The password for the RDS database | `string` | `"Myrds123"` | no |
-| <a name="input_rds_username"></a> [rds\_username](#input\_rds\_username) | The username for the RDS database | `string` | `"Myrds1"` | no |
+| <a name="input_rds_username"></a> [rds\_username](#input\_rds\_username) | The username for the RDS database | `string` | `"Myrds2"` | no |
 | <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr) | CIDR block for the VPC | `string` | `"10.0.0.0/16"` | no |
 
 ## Outputs
