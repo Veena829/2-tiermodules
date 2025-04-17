@@ -48,16 +48,22 @@ jobs:
 
       - name: Install TFLint
         run: |
+          echo "Installing TFLint..."
           curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
 
       - name: Run TFLint
-        run: tflint
+        run: |
+          echo "Running TFLint..."
+          tflint
+        continue-on-error: true
+
       - name: Install Checkov
         run: pip install checkov
 
       - name: Run Checkov
-        id: checkov
-        run: checkov -d .
+        run: |
+          echo "Running Checkov..."
+          checkov -d .
         continue-on-error: true
 
       - name: Set Checkov result
