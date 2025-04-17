@@ -1,8 +1,8 @@
 resource "aws_instance" "web_server_1" {
-  ami                      = var.ami_id
-  instance_type            = var.instance_type
-  subnet_id                = var.public_subnet_1_id
-  vpc_security_group_ids   = [var.security_group_id]
+  ami                         = var.ami_id
+  instance_type               = var.instance_type
+  subnet_id                   = var.public_subnet_1_id
+  vpc_security_group_ids      = [var.security_group_id]
   associate_public_ip_address = true
 
   tags = {
@@ -26,10 +26,10 @@ resource "aws_instance" "web_server_1" {
 }
 
 resource "aws_instance" "web_server_2" {
-  ami                      = var.ami_id
-  instance_type            = var.instance_type
-  subnet_id                = var.public_subnet_2_id
-  vpc_security_group_ids   = [var.security_group_id]
+  ami                         = var.ami_id
+  instance_type               = var.instance_type
+  subnet_id                   = var.public_subnet_2_id
+  vpc_security_group_ids      = [var.security_group_id]
   associate_public_ip_address = true
 
   tags = {
