@@ -54,11 +54,15 @@ jobs:
       - name: Terraform Plan
         run: terraform plan
 
-      - name: Lint Terraform Code
+      - name: Install TFLint
         run: |
           curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-          tflint --init
-          tflint --config .tflint.hcl
+
+      - name: Initialize TFLint Plugins
+        run: tflint --init
+
+      - name: Run TFLint
+        run: tflint --config tflint.hcl
 
       - name: Install Checkov
         run: pip install checkov
