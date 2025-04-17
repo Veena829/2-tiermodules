@@ -17,9 +17,10 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
 
-    permissions:
-      id-token: write
-      contents: read
+  permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
 
     steps:
     - name: Checkout repository
