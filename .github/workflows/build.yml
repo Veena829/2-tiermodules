@@ -81,6 +81,7 @@ jobs:
           else
             echo "checkov_failed=false" >> $GITHUB_ENV
           fi
+
       - name: Conditional step based on Checkov result
         if: ${{ env.checkov_failed == 'false' }}
         run: echo "Checkov passed, running subsequent steps..."
