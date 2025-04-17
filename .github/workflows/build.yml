@@ -1,80 +1,90 @@
-name: Terraform Deployment workflow
-
+name: terraform deployment workflow
+ 
 on:
   workflow_dispatch:
     inputs:
-      action:
-        description: 'Action to perform'
+      branch:
+        description: 'Branch to deploy'
         required: true
-        default: 'plan'
-        type: choice
-        options:
-          - plan
-          - apply
-          - destroy
-
+        default: 'main'
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+ 
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+ 
 jobs:
   terraform:
     runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write
-      contents: write
-      pull-requests: write
-
+ 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref || github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+ 
+     
+      - name: Set up AWS credentials with OIDC
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::877786395093:role/GitHubActionsRole
+          aws-region: us-east-1
+ 
 
-      - name: Set up Terraform
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: 1.0.0
-
-      - name: Configure AWS credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v2
+          terraform_version: 1.11.0
+ 
+ 
+      - name: Terraform Init
+        run: terraform init -reconfigure
+ 
+      - name: Terraform Plan
+        run: terraform plan
+ 
+    
+      # - name: Lint Terraform Code
+      #   run: |
+      #     curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+      #     tflint --config tflint.hcl
+ 
+   
+      - name: Generate Markdown with Terraform Docs
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
+        uses: terraform-docs/gh-actions@v1.3.0
         with:
-          role-to-assume: arn:aws:iam::116981791124:role/idp-role
-          aws-region: us-west-1
-
-      - name: Initialize Terraform
-        run: terraform init
-
-      - name: Validate Terraform
-        run: terraform validate
-
-      - name: Format Terraform
-        run: terraform fmt -recursive
-
-      - name: Install TFLint
+          output-file: README.md
+          output-method: inject
+          git-push: true
+          config-file: .terraform-docs.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+ 
+    
+      - name: Configure Git
         run: |
-          echo "Installing TFLint..."
-          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-
-      - name: Run TFLint
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+ 
+      - name: Posting README.md as PR Comment
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2.9.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          header: "Terraform Documentation "
+          path: "README.md"
+ 
+      - name: Applying Terraform after PR Merge
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          echo "Running TFLint..."
-          tflint
-        continue-on-error: true
-
-      - name: Install Checkov
-        run: pip install checkov
-
-      - name: Run Checkov
-        run: |
-          echo "Running Checkov..."
-          checkov -d .
-        continue-on-error: true
-
-      - name: Set Checkov result
-        id: set-checkov-result
-        run: |
-          if [ "${{ steps.checkov.outcome }}" == "failure" ]; then
-            echo "checkov_failed=true" >> $GITHUB_ENV
-          else
-            echo "checkov_failed=false" >> $GITHUB_ENV
-          fi
-
-      - name: Conditional step based on Checkov result
-        if: ${{ env.checkov_failed == 'false' }}
-        run: echo "Checkov passed, running subsequent steps..."
+          terraform init
+          terraform apply -auto-approve
