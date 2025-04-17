@@ -54,10 +54,10 @@ jobs:
       - name: Terraform Plan
         run: terraform plan
 
-      # - name: Lint Terraform Code
-      #   run: |
-      #     curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-      #     tflint --config tflint.hcl
+      - name: Lint Terraform Code
+        run: |
+          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+          tflint --config tflint.hcl
 
       - name: Generate Markdown with Terraform Docs
         if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
