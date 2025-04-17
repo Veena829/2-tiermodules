@@ -57,18 +57,18 @@ jobs:
       if: github.event.inputs.action == 'destroy'
       run: terraform destroy -auto-approve
 
-    - name: Create Markdown File
+    - name: Update README.md
       run: |
-        echo "# Terraform Deployment" > deployment.md
-        echo "## Action: ${GITHUB_EVENT_INPUTS_ACTION}" >> deployment.md
-        echo "### Terraform Plan Output" >> deployment.md
+        echo "# Terraform Deployment" > README.md
+        echo "## Action: ${GITHUB_EVENT_INPUTS_ACTION}" >> README.md
+        echo "### Terraform Plan Output" >> README.md
         terraform plan -out=tfplan > plan_output.txt
-        cat plan_output.txt >> deployment.md
+        cat plan_output.txt >> README.md
 
-    - name: Commit and Push Markdown File
+    - name: Commit and Push README.md
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add deployment.md
-        git commit -m "Add Terraform deployment plan"
+        git add README.md
+        git commit -m "Update README.md with Terraform deployment plan"
         git push
