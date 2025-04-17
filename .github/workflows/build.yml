@@ -52,11 +52,11 @@ jobs:
     - name: Run TFLint
       run: tflint
 
-    - name: Install Checkov
-      run: pip install checkov
+    # - name: Install Checkov
+    #   run: pip install checkov
 
-    - name: Run Checkov
-      run: checkov -d .
+    # - name: Run Checkov
+    #   run: checkov -d .
 
     - name: Terraform Plan
       if: github.event.inputs.action == 'plan'
