@@ -60,27 +60,34 @@ jobs:
           tflint --init
           tflint --config .tflint.hcl
 
+      # - name: Install Checkov
+      #   run: pip install checkov
+
+      # - name: Run Checkov
+      #   run: |
+      #     echo "Running Checkov..."
+      #     checkov -d .
+      #   continue-on-error: true
+
+      # - name: Set Checkov result
+      #   id: set-checkov-result
+      #   run: |
+      #     if [ "${{ steps.checkov.outcome }}" == "failure" ]; then
+      #       echo "checkov_failed=true" >> $GITHUB_ENV
+      #     else
+      #       echo "checkov_failed=false" >> $GITHUB_ENV
+      #     fi
+
+      # - name: Conditional step based on Checkov result
+      #   if: ${{ env.checkov_failed == 'false' }}
+      #   run: echo "Checkov passed, running subsequent steps..."
+
       - name: Install Checkov
         run: pip install checkov
-
-      - name: Run Checkov
+      - name: Run Checkov with soft fail
         run: |
-          echo "Running Checkov..."
-          checkov -d .
-        continue-on-error: true
-
-      - name: Set Checkov result
-        id: set-checkov-result
-        run: |
-          if [ "${{ steps.checkov.outcome }}" == "failure" ]; then
-            echo "checkov_failed=true" >> $GITHUB_ENV
-          else
-            echo "checkov_failed=false" >> $GITHUB_ENV
-          fi
-
-      - name: Conditional step based on Checkov result
-        if: ${{ env.checkov_failed == 'false' }}
-        run: echo "Checkov passed, running subsequent steps..."
+          pip install checkov
+          checkov --directory . --soft-fail
 
       - name: Generate Markdown with Terraform Docs
         if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
