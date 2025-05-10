@@ -49,7 +49,7 @@ variable "rds_instance_class" {
 variable "rds_username" {
   description = "The username for the RDS database"
   type        = string
-  default     = "Myrds1"
+  default     = "Myrds2"
 }
 
 variable "rds_password" {
